@@ -8,9 +8,11 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/AgentForgeEngine/AgentForgeEngine/pkg/interfaces"
+	"github.com/gorilla/websocket"
 )
 
 type WebSocketModel struct {
@@ -69,39 +71,14 @@ func (m *WebSocketModel) Generate(ctx context.Context, req interfaces.Generation
 }
 
 func (m *WebSocketModel) generateOllama(ctx context.Context, req interfaces.GenerationRequest) (*interfaces.GenerationResponse, error) {
-	// Create Ollama request payload
+	// Create request payload for ollama-websocket-gateway
 	payload := map[string]interface{}{
-		"model":  "default",
+		"model":  m.config.Name, // Use model name from config
 		"prompt": req.Prompt,
-		"stream": false,
-		"options": map[string]interface{}{
-			"temperature": req.Temperature,
-			"num_predict": req.MaxTokens,
-			"stop":        req.StopTokens,
-		},
 	}
 
-	// Make API call
-	resp, err := m.makeAPIRequest(ctx, "/api/generate", payload)
-	if err != nil {
-		return nil, err
-	}
-
-	// Parse Ollama response
-	var response struct {
-		Response string `json:"response"`
-		Done     bool   `json:"done"`
-	}
-
-	if err := json.Unmarshal(resp, &response); err != nil {
-		return nil, fmt.Errorf("failed to parse Ollama response: %w", err)
-	}
-
-	return &interfaces.GenerationResponse{
-		Text:     response.Response,
-		Finished: response.Done,
-		Model:    m.config.Name,
-	}, nil
+	// Use WebSocket directly for ollama-websocket-gateway
+	return m.generateViaWebSocket(ctx, payload)
 }
 
 func (m *WebSocketModel) generateGeneric(ctx context.Context, req interfaces.GenerationRequest) (*interfaces.GenerationResponse, error) {

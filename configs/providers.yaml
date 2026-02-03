@@ -1,0 +1,42 @@
+server:
+  host: "localhost"
+  port: 8080
+
+providers:
+  - name: "qwen3-coder"
+    path: "./providers/json-rpc-bridge"
+    config:
+      endpoint: "ws://localhost:11435"
+      model_name: "qwen3-coder:30b"
+      timeout: 60
+
+agents:
+  local:
+    - name: "task-agent"
+      path: "./agents/task-agent"
+      config:
+        max_concurrent_tasks: 5
+    - name: "file-agent"
+      path: "./agents/file-agent"
+      config:
+        allowed_extensions: [".txt", ".md", ".go", ".yaml", ".json"]
+        max_file_size: 10485760  # 10MB
+    - name: "web-agent"
+      path: "./agents/web-agent"
+      config:
+        default_max_tokens: 8000
+        max_allowed_tokens: 15000
+        min_allowed_tokens: 500
+        timeout: 15
+        user_agent: "AgentForgeEngine-WebAgent/1.0"
+        allowed_domains: ["*"]
+        blocked_domains: ["ads.*", "trackers.*"]
+        content_types: ["text/html", "application/json", "text/plain", "application/xml", "text/xml"]
+        include_links: true
+        include_metadata: true
+
+recovery:
+  hot_reload: true
+  max_retries: 3
+  backoff_sec: 5
+  health_check: 30

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -17,6 +16,7 @@ import (
 
 type Manager struct {
 	registry   map[string]interfaces.Agent
+	providers  map[string]interfaces.Provider
 	pluginsDir string
 	tempDir    string
 }
@@ -31,6 +31,7 @@ func NewManager(pluginsDir, tempDir string) *Manager {
 
 	return &Manager{
 		registry:   make(map[string]interfaces.Agent),
+		providers:  make(map[string]interfaces.Provider),
 		pluginsDir: pluginsDir,
 		tempDir:    tempDir,
 	}
@@ -44,6 +45,17 @@ func (pm *Manager) LoadLocalAgent(path, name string) error {
 	}
 
 	// Load the plugin
+	return pm.loadPlugin(outputPath, name)
+}
+
+func (pm *Manager) LoadLocalProvider(path, name string) error {
+	// Build the provider plugin
+	outputPath := filepath.Join(pm.pluginsDir, name+"-provider.so")
+	if err := pm.buildPlugin(path, outputPath); err != nil {
+		return fmt.Errorf("failed to build provider plugin %s: %w", name, err)
+	}
+
+	// Load the provider
 	return pm.loadPlugin(outputPath, name)
 }
 
@@ -83,12 +95,25 @@ func (pm *Manager) GetAgent(name string) (interfaces.Agent, bool) {
 	return agent, exists
 }
 
+func (pm *Manager) GetProvider(name string) (interfaces.Provider, bool) {
+	provider, exists := pm.providers[name]
+	return provider, exists
+}
+
 func (pm *Manager) ListAgents() []string {
 	var agents []string
 	for name := range pm.registry {
 		agents = append(agents, name)
 	}
 	return agents
+}
+
+func (pm *Manager) ListProviders() []string {
+	var providers []string
+	for name := range pm.providers {
+		providers = append(providers, name)
+	}
+	return providers
 }
 
 func (pm *Manager) UnloadAgent(name string) error {
@@ -100,9 +125,28 @@ func (pm *Manager) UnloadAgent(name string) error {
 	return nil
 }
 
+func (pm *Manager) UnloadProvider(name string) error {
+	if _, exists := pm.providers[name]; !exists {
+		return fmt.Errorf("provider %s not found", name)
+	}
+
+	provider := pm.providers[name]
+	if err := provider.Shutdown(); err != nil {
+		fmt.Printf("Error shutting down provider %s: %v", name, err)
+	}
+
+	delete(pm.providers, name)
+	return nil
+}
+
 func (pm *Manager) ReloadAgent(name string) error {
 	// For now, just unload - the calling code should handle reloading
 	return pm.UnloadAgent(name)
+}
+
+func (pm *Manager) ReloadProvider(name string) error {
+	// For now, just unload - the calling code should handle reloading
+	return pm.UnloadProvider(name)
 }
 
 func (pm *Manager) buildPlugin(source, output string) error {
@@ -135,22 +179,34 @@ func (pm *Manager) loadPlugin(path, name string) error {
 		return fmt.Errorf("failed to open plugin: %w", err)
 	}
 
-	// Look for the Agent symbol
+	// Look for the Agent symbol first
 	symAgent, err := p.Lookup("Agent")
-	if err != nil {
-		return fmt.Errorf("plugin missing Agent symbol: %w", err)
-	}
-
-	// Type assert to interface
-	agent, ok := symAgent.(interfaces.Agent)
-	if !ok {
+	if err == nil {
+		// Type assert to Agent interface
+		if agent, ok := symAgent.(interfaces.Agent); ok {
+			// Register the agent
+			pm.registry[name] = agent
+			fmt.Printf("Successfully loaded agent: %s", name)
+			return nil
+		}
 		return fmt.Errorf("invalid Agent type in plugin")
 	}
 
-	// Register the agent
-	pm.registry[name] = agent
+	// Try Provider symbol if Agent not found
+	symProvider, providerErr := p.Lookup("Provider")
+	if providerErr != nil {
+		return fmt.Errorf("plugin missing Agent and Provider symbols: %w", err)
+	}
 
-	log.Printf("Successfully loaded agent: %s", name)
+	// Type assert to Provider interface
+	provider, ok := symProvider.(interfaces.Provider)
+	if !ok {
+		return fmt.Errorf("invalid Provider type in plugin")
+	}
+
+	// Register the provider
+	pm.providers[name] = provider
+	fmt.Printf("Successfully loaded provider: %s", name)
 	return nil
 }
 
@@ -208,16 +264,27 @@ func (pm *Manager) validateCompatibility(dir string) error {
 	return nil
 }
 
-// Health check all loaded agents
+// Health check all loaded agents and providers
 func (pm *Manager) HealthCheckAll(ctx context.Context) map[string]error {
 	results := make(map[string]error)
 
+	// Check agents
 	for name, agent := range pm.registry {
 		select {
 		case <-ctx.Done():
 			results[name] = ctx.Err()
 		default:
 			results[name] = agent.HealthCheck()
+		}
+	}
+
+	// Check providers
+	for name, provider := range pm.providers {
+		select {
+		case <-ctx.Done():
+			results[name] = ctx.Err()
+		default:
+			results[name] = provider.HealthCheck()
 		}
 	}
 

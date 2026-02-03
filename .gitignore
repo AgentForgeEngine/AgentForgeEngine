@@ -1,59 +1,10 @@
-# Binaries
-afe
-agentforge
-agentforge-engine
+# Provider and test files
+PROVIDER_ARCHITECTURE.md
+PROVIDER_IMPLEMENTATION_REPORT.md
 
 # Build artifacts
-*.so
-*.exe
-*.dll
-*.dylib
+plugins/
+json-rpc-bridge-provider.so
 
-# Test binary, built with `go test -c`
-*.test
-
-# Output of the go coverage tool
-*.out
-
-# Dependency directories
-vendor/
-
-# Go workspace file
-go.work
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Temporary files
-*.tmp
-*.temp
-temp/
-tmp/
-
-# Logs
-*.log
-logs/
-
-# Environment files
-.env
-.env.local
-.env.*.local
-
-# Runtime data
-*.pid
-
-# Configuration files with secrets
-config.local.yaml
-agentforge.local.yaml
-
-# Documentation that's not part of core code (keep README, exclude build docs)
-BUILD_COMPLETE.md
-WEB_AGENT_COMPLETE.md
+# Test files (temporary)
+test_provider_direct.go

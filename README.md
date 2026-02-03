@@ -1,6 +1,21 @@
 # AgentForgeEngine (AFE)
 
-AgentForgeEngine (AFE) is a modular agent framework that sits between offline models (llama.cpp, ollama) and agents written in Go. It provides dynamic loading of agents from GitHub repositories, hot reload capabilities, and a unified interface for model interactions.
+AgentForgeEngine (AFE) is a modular agent framework that sits between offline models (llama.cpp, ollama) and agents written in Go. It provides dynamic loading of **agents and providers** from GitHub repositories, hot reload capabilities, and a unified interface for model interactions.
+
+## 🚀 New: Provider Plugin Architecture
+
+AgentForgeEngine now supports **provider plugins** for model connections, enabling extensible support for different protocols:
+
+- **JSON-RPC Bridge**: WebSocket-based connections (supports ollama-websocket-gateway)
+- **HTTP Providers**: REST API connections (supports llama.cpp, OpenAI, etc.)
+- **WebSocket Providers**: Native WebSocket protocols (supports Ollama, custom implementations)
+- **gRPC Providers**: Binary protocol connections (future support)
+
+### **Provider System Benefits**
+- **Hot Reloadable**: `afe reload --provider name` for zero-downtime updates
+- **Protocol Flexible**: Easy addition of new connection types
+- **Same Pattern**: Uses exact same approach as agent plugins
+- **Backward Compatible**: Legacy model configs still supported with warnings
 
 ## Features
 

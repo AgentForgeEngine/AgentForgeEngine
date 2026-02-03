@@ -9,12 +9,12 @@ models:
     options:
       timeout: 30
       max_retries: 3
-  - name: "ollama"
+  - name: "qwen3-coder"
     type: "websocket"
-    endpoint: "ws://localhost:11434"
+    endpoint: "ws://localhost:11435"
     options:
-      timeout: 30
-      max_retries: 3
+      timeout: 60
+      max_retries: 0
 
 agents:
   local:
