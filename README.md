@@ -1,6 +1,6 @@
-# AgentForge Engine
+# AgentForgeEngine (AFE)
 
-AgentForge Engine is a modular agent framework that sits between offline models (llama.cpp, ollama) and agents written in Go. It provides dynamic loading of agents from GitHub repositories, hot reload capabilities, and a unified interface for model interactions.
+AgentForgeEngine (AFE) is a modular agent framework that sits between offline models (llama.cpp, ollama) and agents written in Go. It provides dynamic loading of agents from GitHub repositories, hot reload capabilities, and a unified interface for model interactions.
 
 ## Features
 
@@ -14,11 +14,11 @@ AgentForge Engine is a modular agent framework that sits between offline models 
 ## Quick Start
 
 ```bash
-# Build AgentForge Engine
-go build -o agentforge-engine ./cmd/agentforge
+# Build AgentForgeEngine (AFE)
+go build -o afe ./cmd/agentforge
 
 # Run with configuration
-./agentforge-engine start --config configs/agentforge.yaml
+./afe start --config configs/agentforge.yaml
 ```
 
 ## Configuration
@@ -58,17 +58,17 @@ recovery:
 ## CLI Commands
 
 ```bash
-# Start AgentForge Engine
-./agentforge-engine start [--config path/to/config.yaml]
+# Start AgentForgeEngine
+./afe start [--config path/to/config.yaml]
 
 # Stop running instance
-./agentforge-engine stop
+./afe stop
 
 # Check status
-./agentforge-engine status
+./afe status
 
 # Reload agents
-./agentforge-engine reload [--agent agent-name]
+./afe reload [--agent agent-name]
 ```
 
 ## Agent Development
