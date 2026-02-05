@@ -1,0 +1,120 @@
+{# ============================================================
+   Extract system prompt and mode
+   ============================================================ #}
+{%- set system_prompt = '' -%}
+{%- set mode = 'plan' -%}
+
+{%- for msg in messages -%}
+  {%- if msg['role'] == 'system' -%}
+    {%- set system_prompt = msg['content'] -%}
+
+    {# Extract <mode>...</mode> if present #}
+    {%- if '<mode>' in msg['content'] and '</mode>' in msg['content'] -%}
+      {%- set mode = msg['content'].split('<mode>')[1].split('</mode>')[0].strip() -%}
+    {%- endif -%}
+
+  {%- endif -%}
+{%- endfor -%}
+
+{# ============================================================
+   SYSTEM BLOCK WITH AUTO‑INSERTED MODE + STATIC TOOL LIST
+   ============================================================ #}
+<|im_start|>system
+You are operating in **{{ mode | upper }} MODE**.
+
+You MUST respond ONLY in English and ONLY using this exact format:
+
+<function_call name="{tool_name}">{json_arguments}</function_call>
+
+Rules:
+- No markdown
+- No explanations
+- No prose
+- No alternative formats
+- Output MUST match the syntax exactly
+- JSON must be valid
+- The <function_call> tag must open and close exactly as shown
+
+Mode rules:
+{% if mode == "plan" %}
+- You may ONLY use read‑only Linux tools.
+- You may NOT execute commands that modify system state.
+- You may NOT write files.
+- You must propose actions using tool calls.
+{% else %}
+- You may use read/write/execute Linux tools.
+- You must perform actions step-by-step using tool calls.
+{% endif %}
+
+Available tools (static list):
+
+- chat
+  Arguments schema: {"message":"string"}
+
+- todo
+  Arguments schema: {"steps":["string"]}
+
+- ls
+  Arguments schema: {"path":"string","flags":"string"}
+
+- cat
+  Arguments schema: {"path":"string"}
+
+- stat
+  Arguments schema: {"path":"string"}
+
+- grep
+  Arguments schema: {"pattern":"string","path":"string"}
+
+- find
+  Arguments schema: {"path":"string","name":"string"}
+
+- df
+  Arguments schema: {}
+
+- du
+  Arguments schema: {"path":"string"}
+
+- ps
+  Arguments schema: {}
+
+- uname
+  Arguments schema: {}
+
+- whoami
+  Arguments schema: {}
+
+- pwd
+  Arguments schema: {}
+
+{{ system_prompt }}
+<|im_end|>
+
+{# ============================================================
+   RENDER MESSAGE HISTORY
+   ============================================================ #}
+{% for msg in messages %}
+  {% if msg['role'] == 'user' %}
+<|im_start|>user
+{{ msg['content'] }}
+<|im_end|>
+
+  {% elif msg['role'] == 'assistant' %}
+    {% if msg.get('function_call') %}
+<|im_start|>assistant
+<function_call name="{{ msg['function_call']['name'] }}">
+{{ msg['function_call']['arguments'] }}
+</function_call>
+<|im_end|>
+    {% else %}
+<|im_start|>assistant
+{{ msg['content'] }}
+<|im_end|>
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+{# ============================================================
+   FORCE ASSISTANT TO BEGIN TOOL‑CALL OUTPUT
+   ============================================================ #}
+<|im_start|>assistant

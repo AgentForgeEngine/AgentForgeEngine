@@ -1,10 +1,45 @@
+# User-specific files (never commit these)
+.afe/
+~/.afe/
+
+# Build artifacts
+*.so
+*.a
+*.exe
+*.dll
+
+# Cache files
+.cache/
+build_cache.yaml
+build_cache.json
+
+# Go build artifacts
+vendor/
+*.test
+*.prof
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
 # Provider and test files
 PROVIDER_ARCHITECTURE.md
 PROVIDER_IMPLEMENTATION_REPORT.md
-
-# Build artifacts
-plugins/
-json-rpc-bridge-provider.so
 
 # Test files (temporary)
 test_provider_direct.go

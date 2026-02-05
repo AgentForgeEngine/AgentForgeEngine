@@ -149,6 +149,21 @@ func (pm *Manager) ReloadProvider(name string) error {
 	return pm.UnloadProvider(name)
 }
 
+// LoadPluginFromFile loads a plugin from a specific file path
+func (pm *Manager) LoadPluginFromFile(pluginPath, pluginName string) error {
+	return pm.loadPlugin(pluginPath, pluginName)
+}
+
+// AddProviderToRegistry adds a provider to the registry (for hot reload)
+func (pm *Manager) AddProviderToRegistry(name string, provider interfaces.Provider) {
+	pm.providers[name] = provider
+}
+
+// AddAgentToRegistry adds an agent to the registry (for hot reload)
+func (pm *Manager) AddAgentToRegistry(name string, agent interfaces.Agent) {
+	pm.registry[name] = agent
+}
+
 func (pm *Manager) buildPlugin(source, output string) error {
 	// Ensure plugins directory exists
 	if err := os.MkdirAll(pm.pluginsDir, 0755); err != nil {
