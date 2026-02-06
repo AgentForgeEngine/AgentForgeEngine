@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/AgentForgeEngine/AgentForgeEngine/internal/config"
+	"github.com/AgentForgeEngine/AgentForgeEngine/pkg/status"
+	"github.com/AgentForgeEngine/AgentForgeEngine/pkg/userdirs"
 	"github.com/spf13/cobra"
 )
 
@@ -22,19 +24,36 @@ var startCmd = &cobra.Command{
 
 var serverCtx context.Context
 var serverCancel context.CancelFunc
+var statusManager *status.Manager
 
 func runStart(cmd *cobra.Command, args []string) error {
+	// Initialize user directories and status manager
+	userDirs, err := userdirs.NewUserDirectories()
+	if err != nil {
+		return fmt.Errorf("failed to initialize user directories: %w", err)
+	}
+
+	statusManager = status.NewManager(userDirs.AFEDir)
+
+	// Write PID file
+	if err := statusManager.WritePID(); err != nil {
+		return fmt.Errorf("failed to write PID file: %w", err)
+	}
+
 	// Initialize config manager
 	configManager := config.NewManager()
 	configPath := getConfigPath()
 
 	if err := configManager.Load(configPath); err != nil {
+		statusManager.Cleanup()
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 
 	if verbose {
 		fmt.Println("Starting AgentForge Engine...")
 		fmt.Printf("Config loaded from: %s\n", configPath)
+		fmt.Printf("PID file: %s\n", statusManager.GetPIDFile())
+		fmt.Printf("Socket file: %s\n", statusManager.GetSocketFile())
 	}
 
 	// Create context with cancellation
@@ -44,9 +63,27 @@ func runStart(cmd *cobra.Command, args []string) error {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
+	// Create status info
+	statusInfo := &status.StatusInfo{
+		PID:         os.Getpid(),
+		StartTime:   time.Now(),
+		Version:     "1.0.0",
+		Status:      "RUNNING",
+		Host:        "localhost",
+		Port:        8080,
+		ModelsCount: 0,
+		AgentsCount: 0,
+	}
+
+	// Start socket server for status queries
+	if err := statusManager.StartSocketServer(statusInfo); err != nil {
+		statusManager.Cleanup()
+		return fmt.Errorf("failed to start status socket server: %w", err)
+	}
+
 	// Start the server components
 	go func() {
-		if err := startServerComponents(serverCtx, configManager); err != nil {
+		if err := startServerComponents(serverCtx, configManager, statusInfo); err != nil {
 			log.Printf("Server error: %v", err)
 			serverCancel()
 		}
@@ -72,11 +109,16 @@ func runStart(cmd *cobra.Command, args []string) error {
 	serverCancel()
 	time.Sleep(2 * time.Second) // Give components time to cleanup
 
+	// Cleanup status files
+	if err := statusManager.Cleanup(); err != nil && verbose {
+		log.Printf("Cleanup error: %v", err)
+	}
+
 	fmt.Println("AgentForge Engine stopped")
 	return nil
 }
 
-func startServerComponents(ctx context.Context, configManager *config.Manager) error {
+func startServerComponents(ctx context.Context, configManager *config.Manager, statusInfo *status.StatusInfo) error {
 	// This will be implemented when we add the actual server components
 	// For now, just demonstrate the structure
 
@@ -84,6 +126,10 @@ func startServerComponents(ctx context.Context, configManager *config.Manager) e
 	if verbose {
 		fmt.Printf("Server starting on %s:%d\n", serverConfig.Host, serverConfig.Port)
 	}
+
+	// Update status info with server config
+	statusInfo.Host = serverConfig.Host
+	statusInfo.Port = serverConfig.Port
 
 	// TODO: Initialize model manager
 	// TODO: Initialize plugin manager
