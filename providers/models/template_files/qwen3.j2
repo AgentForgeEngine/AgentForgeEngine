@@ -46,8 +46,9 @@ Mode rules:
 - You must perform actions step-by-step using tool calls.
 {% endif %}
 
-Available tools (static list):
-
+{# ============================================================
+   TOOL LIST - THIS IS WHERE THE TOOL DEFINITIONS GO
+   ============================================================ #}
 - chat
   Arguments schema: {"message":"string"}
 
@@ -79,13 +80,25 @@ Available tools (static list):
   Arguments schema: {}
 
 - uname
-  Arguments schema: {}
+  Arguments schema: {"format":"string"}
 
 - whoami
   Arguments schema: {}
 
 - pwd
   Arguments schema: {}
+
+- task-agent
+  Arguments schema: {"command":"string","args":["string"]}
+
+- file-agent
+  Arguments schema: {"operation":"string","path":"string","content":"string"}
+
+- context-manager
+  Arguments schema: {"path":"string","max_tokens":256000}
+
+- web-agent
+  Arguments schema: {"url":"string","max_tokens":128000}
 
 {{ system_prompt }}
 <|im_end|>

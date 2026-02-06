@@ -1,8 +1,10 @@
-# AgentForge Engine 🚀
+# AgentForgeEngine 🚀
 
 [![Go Version](https://img.shields.io/badge/Go-1.24+-blue.svg)](https://golang.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com/AgentForgeEngine/AgentForgeEngine)
+[![Testing Framework](https://img.shields.io/badge/Tests-Comprehensive-orange.svg)](docs/AGENT_TESTING.md)
+[![Function Response](https://img.shields.io/badge/Protocol-Standardized-purple.svg)](docs/AGENT_TESTING.md)
 
 A modular, high-performance agent framework that sits between offline models (llama.cpp, ollama) and agents written in Go. Features dynamic loading of agents, hot reload capabilities, and a unified interface for model interactions.
 
@@ -15,6 +17,9 @@ A modular, high-performance agent framework that sits between offline models (ll
 - **⚡ High Performance**: Parallel builds and optimized caching
 - **🔧 Developer-Friendly**: Comprehensive CLI with clear feedback
 - **🌐 Cross-Platform**: Works on Linux, macOS, and Windows
+- **📊 Advanced Status Tracking**: Hybrid PID file and Unix socket monitoring
+- **🧪 Comprehensive Testing**: Model-independent agent testing framework
+- **🤖 Function Response Format**: Standardized agent-model communication protocol
 
 ## 📋 Table of Contents
 
@@ -23,7 +28,9 @@ A modular, high-performance agent framework that sits between offline models (ll
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Build System](#build-system)
+- [Status Management](#status-management)
 - [User Management](#user-management)
+- [Agent Testing](#agent-testing)
 - [Plugin Development](#plugin-development)
 - [API Reference](#api-reference)
 - [Contributing](#contributing)
@@ -88,14 +95,33 @@ AgentForgeEngine/
 │   ├── cache/            # Build cache system
 │   ├── hotreload/        # Hot reload manager
 │   ├── auth/             # User management
+│   ├── status/           # Status tracking system
+│   ├── testing/          # Agent testing framework
 │   └── userdirs/         # User directory management
 ├── providers/              # Provider plugins
 │   ├── qwen3/
 │   └── json-rpc-bridge/
 ├── agents/                 # Agent plugins
-│   ├── web-agent/
-│   ├── file-agent/
-│   └── task-agent/
+│   ├── ls/                # File listing agent
+│   ├── cat/               # File reading agent
+│   ├── todo/              # Task management agent
+│   ├── pwd/               # Working directory agent
+│   ├── whoami/            # User identity agent
+│   ├── uname/             # System information agent
+│   ├── ps/                # Process listing agent
+│   ├── df/                # Disk space agent
+│   ├── du/                # Disk usage agent
+│   ├── grep/              # Text search agent
+│   ├── find/              # File search agent
+│   ├── stat/              # File status agent
+│   ├── chat/              # Chat interface agent
+│   ├── web-agent/         # Web interaction agent
+│   ├── file-agent/        # File management agent
+│   └── task-agent/        # Task execution agent
+├── scripts/                # Utility scripts
+│   └── test_agents.sh     # Agent testing runner
+├── docs/                   # Documentation
+│   └── AGENT_TESTING.md   # Testing framework guide
 └── providers/models/       # Shared templates
 ```
 
@@ -110,7 +136,9 @@ AgentForgeEngine/
 ├── agents/                # Built agent plugins
 ├── cache/                 # Build cache system
 ├── config/                # User configuration
-└── logs/                  # System logs
+├── logs/                  # System logs
+├── afe.pid               # Process ID file for status tracking
+└── afe.sock              # Unix socket for detailed status communication
 ```
 
 ## 🔧 Configuration
@@ -147,7 +175,7 @@ logging:
 
 ## 🏗️ Build System
 
-The AgentForge Engine features an intelligent build system with caching and hot reload.
+The AgentForgeEngine features an intelligent build system with caching and hot reload.
 
 ### Build Commands
 
@@ -208,9 +236,64 @@ afe cache clean --force
 afe cache validate
 ```
 
+## 📊 Status Management
+
+AgentForgeEngine features a hybrid status tracking system using both PID files and Unix sockets for reliable process monitoring.
+
+### Status Commands
+
+```bash
+# Check engine status (basic PID file check)
+./afe status
+
+# Check detailed status with verbose output
+./afe status --verbose
+
+# Start the engine with status tracking
+./afe start
+
+# Stop the engine gracefully
+./afe stop
+```
+
+### Status Output Examples
+
+```bash
+# When running with detailed status
+$ ./afe status --verbose
+AgentForgeEngine Status:
+=========================
+Status: RUNNING ✓
+Process: AgentForgeEngine is active (PID: 12345)
+
+Detailed Information:
+  - Version: 1.0.0
+  - Uptime: 5m23s
+  - Start Time: 2024-01-15 10:30:00
+  - Server: localhost:8080
+  - Models Loaded: 0
+  - Agents Loaded: 0
+  - Config: ./configs/agentforge.yaml
+
+# When stopped
+$ ./afe status
+AgentForgeEngine Status:
+=========================
+Status: STOPPED ✗
+Process: No AgentForgeEngine instance found
+```
+
+### Status Tracking Features
+
+- **🔄 Hybrid Monitoring**: PID file for basic detection + Unix socket for detailed status
+- **📊 Rich Status Information**: Uptime, version, server details, plugin counts
+- **⚡ Real-time Updates**: Live status via Unix socket communication
+- **🛡️ Graceful Shutdown**: SIGTERM → SIGKILL fallback with proper cleanup
+- **🧹 Automatic Cleanup**: PID and socket files removed on exit
+
 ## 🛡️ User Management
 
-AgentForge Engine includes a secure user management system with LevelDB storage and bcrypt password hashing.
+AgentForgeEngine includes a secure user management system with LevelDB storage and bcrypt password hashing.
 
 ### User Commands
 
@@ -235,6 +318,64 @@ afe user api-key list --email "john@example.com"
 - **🔑 API Key Management**: Cryptographically secure key generation
 - **📊 Audit Trail**: Creation dates, last login, usage tracking
 - **🔒 Access Control**: Role-based permissions and scopes
+```
+
+## 🧪 Agent Testing
+
+AgentForgeEngine includes a comprehensive testing framework for validating agent functionality and model communication without requiring running models.
+
+### Function Response Format
+
+Agents communicate with models using the standardized format:
+
+```xml
+<function_response name="agent_name">{JSON_DATA}</function_response>
+```
+
+### Testing Commands
+
+```bash
+# Run all integration tests
+./scripts/test_agents.sh integration
+
+# Test specific agent
+./scripts/test_agents.sh agent ls
+
+# Test all agents with comprehensive validation
+./scripts/test_agents.sh all
+
+# Run tests manually
+go test -v ./pkg/testing
+```
+
+### Testing Features
+
+- **🔍 Model-Independent Testing**: No dependencies on running models
+- **📋 Function Response Validation**: XML/JSON format compliance checking
+- **🧪 Comprehensive Agent Tests**: Unit, integration, and error handling tests
+- **🎭 Mock Model Responses**: Complete simulation of model-agent communication
+- **🤖 Interface Compliance**: Ensures proper agent implementation
+- **⚡ Automated Test Runner**: Easy testing of all agents
+
+### Test Categories
+
+1. **Unit Tests**: Individual agent functionality and parameter validation
+2. **Function Response Tests**: XML format validation and JSON structure checking
+3. **Integration Tests**: Model response simulation and end-to-end workflows
+4. **Error Handling Tests**: Invalid input handling and edge case validation
+
+### Example Test Output
+
+```bash
+✅ Integration tests passed
+✅ Function response format test passed for ls
+✅ Unit tests passed for ls
+✅ Built ls plugin
+✅ Model response parsing validated
+✅ Round-trip testing completed
+```
+
+For detailed testing documentation, see [Agent Testing Guide](docs/AGENT_TESTING.md).
 
 ## 📦 Plugin Development
 
@@ -349,9 +490,15 @@ type Agent interface {
 
 #### System Commands
 - `afe init` - Initialize user directories
-- `afe start` - Start the engine
-- `afe stop` - Stop the engine
-- `afe status` - Check system status
+- `afe start` - Start the engine with status tracking
+- `afe stop` - Stop the engine gracefully
+- `afe status` - Check system status (PID file + socket monitoring)
+
+#### Testing Commands
+- `./scripts/test_agents.sh integration` - Run integration tests
+- `./scripts/test_agents.sh agent <name>` - Test specific agent
+- `./scripts/test_agents.sh all` - Test all agents
+- `go test -v ./pkg/testing` - Run testing framework
 
 ## 🤝 Contributing
 
@@ -367,7 +514,14 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 3. **Make your changes**
 4. **Run tests**
    ```bash
+   # Run all tests
    go test ./...
+   
+   # Run agent integration tests
+   ./scripts/test_agents.sh integration
+   
+   # Test specific agent
+   ./scripts/test_agents.sh agent ls
    ```
 5. **Commit your changes**
    ```bash
@@ -392,10 +546,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Documentation**: [AgentForge Engine Docs](https://docs.agentforge.engine)
+- **Documentation**: [AgentForgeEngine Docs](https://docs.agentforge.engine)
 - **Issues**: [GitHub Issues](https://github.com/AgentForgeEngine/AgentForgeEngine/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/AgentForgeEngine/AgentForgeEngine/discussions)
 
 ---
 
-**Built with ❤️ by the AgentForge Engine team**
+**Built with ❤️ by the AgentForgeEngine team**

@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"os/exec"
-	"runtime"
 
+	"github.com/AgentForgeEngine/AgentForgeEngine/pkg/status"
+	"github.com/AgentForgeEngine/AgentForgeEngine/pkg/userdirs"
 	"github.com/spf13/cobra"
 )
 
@@ -19,58 +19,66 @@ func runStatus(cmd *cobra.Command, args []string) error {
 	fmt.Println("AgentForge Engine Status:")
 	fmt.Println("=========================")
 
-	// Check if the process is running
-	running := isRunning()
+	// Initialize user directories and status manager
+	userDirs, err := userdirs.NewUserDirectories()
+	if err != nil {
+		return fmt.Errorf("failed to initialize user directories: %w", err)
+	}
 
-	if running {
-		fmt.Println("Status: RUNNING ✓")
-		fmt.Println("Process: AgentForge Engine is active")
+	statusManager := status.NewManager(userDirs.AFEDir)
 
-		// Try to get more detailed status
-		if verbose {
-			fmt.Println("\nDetailed Information:")
-			printDetailedStatus()
-		}
+	// First try to get detailed status via socket
+	statusInfo, err := statusManager.GetStatusViaSocket()
+	if err == nil {
+		// Got detailed status from socket
+		printDetailedStatus(statusInfo)
 	} else {
-		fmt.Println("Status: STOPPED ✗")
-		fmt.Println("Process: No AgentForge Engine instance found")
+		// Fallback to basic PID file status
+		statusInfo = statusManager.GetBasicStatus()
+		printBasicStatus(statusInfo)
 	}
 
 	return nil
 }
 
-func isRunning() bool {
-	var command string
-	var args []string
+func printDetailedStatus(statusInfo *status.StatusInfo) {
+	fmt.Printf("Status: %s ✓\n", statusInfo.Status)
+	fmt.Printf("Process: AgentForge Engine is active (PID: %d)\n", statusInfo.PID)
 
-	switch runtime.GOOS {
-	case "windows":
-		command = "tasklist"
-		args = []string{"/FI", "IMAGENAME eq agentforge-engine.exe"}
-	case "linux", "darwin":
-		command = "pgrep"
-		args = []string{"-f", "agentforge-engine"}
-	default:
-		return false
+	if verbose {
+		fmt.Println("\nDetailed Information:")
+		fmt.Printf("  - Version: %s\n", statusInfo.Version)
+		fmt.Printf("  - Uptime: %s\n", statusInfo.Uptime)
+		fmt.Printf("  - Start Time: %s\n", statusInfo.StartTime.Format("2006-01-02 15:04:05"))
+		fmt.Printf("  - Server: %s:%d\n", statusInfo.Host, statusInfo.Port)
+		fmt.Printf("  - Models Loaded: %d\n", statusInfo.ModelsCount)
+		fmt.Printf("  - Agents Loaded: %d\n", statusInfo.AgentsCount)
+
+		// Show config file being used
+		if cfgFile != "" {
+			fmt.Printf("  - Config: %s\n", cfgFile)
+		}
 	}
-
-	cmd := exec.Command(command, args...)
-	err := cmd.Run()
-	return err == nil
 }
 
-func printDetailedStatus() {
-	// This will be expanded when we implement the actual status endpoints
-	// For now, just show placeholder information
+func printBasicStatus(statusInfo *status.StatusInfo) {
+	if statusInfo.Status == "RUNNING" {
+		fmt.Printf("Status: %s ✓\n", statusInfo.Status)
+		fmt.Printf("Process: AgentForge Engine is active (PID: %d)\n", statusInfo.PID)
 
-	fmt.Println("  - Models: Not connected")
-	fmt.Println("  - Agents: 0 loaded")
-	fmt.Println("  - Uptime: Unknown")
-	fmt.Println("  - Memory: Unknown")
+		if verbose {
+			fmt.Println("\nBasic Information:")
+			fmt.Println("  - Detailed status unavailable (socket not connected)")
+			fmt.Println("  - Use './afe start --verbose' for detailed logging")
 
-	// Show config file being used
-	if cfgFile != "" {
-		fmt.Printf("  - Config: %s\n", cfgFile)
+			// Show config file being used
+			if cfgFile != "" {
+				fmt.Printf("  - Config: %s\n", cfgFile)
+			}
+		}
+	} else {
+		fmt.Printf("Status: %s ✗\n", statusInfo.Status)
+		fmt.Println("Process: No AgentForge Engine instance found")
 	}
 }
 

@@ -1,9 +1,9 @@
-# AgentForge Engine Build System 🏗️
+# AgentForgeEngine Build System 🏗️
 
 [![Go Version](https://img.shields.io/badge/Go-1.24+-blue.svg)](https://golang.org/)
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com/AgentForgeEngine/AgentForgeEngine)
 
-A comprehensive, intelligent build system for AgentForge Engine plugins with YAML-based caching, parallel compilation, and hot reload integration.
+A comprehensive, intelligent build system for AgentForgeEngine plugins with YAML-based caching, parallel compilation, and hot reload integration.
 
 ## 🌟 Features
 
@@ -193,7 +193,7 @@ $ afe build all --verbose
 User-specific build configuration in `~/.afe/config/build_config.yaml`:
 
 ```yaml
-# AgentForge Engine User Configuration
+# AgentForgeEngine User Configuration
 build:
   plugins_dir: "~/.afe/providers"
   agents_dir: "~/.afe/agents"
@@ -423,4 +423,4 @@ plugins:
 
 ---
 
-**Built with ❤️ by the AgentForge Engine team**
+**Built with ❤️ by the AgentForgeEngine team**

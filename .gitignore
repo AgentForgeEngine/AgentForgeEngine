@@ -1,6 +1,7 @@
 # User-specific files (never commit these)
 .afe/
 ~/.afe/
+./afe
 
 # Build artifacts
 *.so
@@ -17,6 +18,7 @@ build_cache.json
 vendor/
 *.test
 *.prof
+SESSION
 
 # IDE files
 .vscode/
