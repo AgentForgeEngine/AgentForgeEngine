@@ -12,14 +12,14 @@ import (
 
 var stopCmd = &cobra.Command{
 	Use:   "stop",
-	Short: "Stop AgentForge Engine",
-	Long:  "Stop a running instance of AgentForge Engine",
+	Short: "Stop AgentForgeEngine",
+	Long:  "Stop a running instance of AgentForgeEngine",
 	RunE:  runStop,
 }
 
 func runStop(command *cobra.Command, args []string) error {
 	if verbose {
-		fmt.Println("Stopping AgentForge Engine...")
+		fmt.Println("Stopping AgentForgeEngine...")
 	}
 
 	// Initialize user directories and status manager
@@ -33,7 +33,7 @@ func runStop(command *cobra.Command, args []string) error {
 	// Check if process is running using PID file
 	if !statusManager.IsRunning() {
 		if verbose {
-			fmt.Println("No running AgentForge Engine instances found")
+			fmt.Println("No running AgentForgeEngine instances found")
 		}
 		return nil
 	}
@@ -91,7 +91,7 @@ func runStop(command *cobra.Command, args []string) error {
 		fmt.Printf("Cleanup error: %v\n", err)
 	}
 
-	fmt.Println("AgentForge Engine stopped")
+	fmt.Println("AgentForgeEngine stopped")
 	return nil
 }
 

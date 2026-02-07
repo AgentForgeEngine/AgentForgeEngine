@@ -27,14 +27,40 @@ A modular, high-performance agent framework that sits between offline models (ll
 - [Architecture](#architecture)
 - [Installation](#installation)
 - [Configuration](#configuration)
-- [Build System](#build-system)
-- [Status Management](#status-management)
-- [User Management](#user-management)
-- [Agent Testing](#agent-testing)
-- [Plugin Development](#plugin-development)
-- [API Reference](#api-reference)
+- [Documentation](#documentation)
 - [Contributing](#contributing)
 - [License](#license)
+
+## 📚 Documentation
+
+- **[Documentation Index](docs/README.md)** - Complete documentation overview and navigation
+
+### Core Documentation
+- **[Agent Testing Guide](docs/AGENT_TESTING.md)** - Agent testing framework documentation
+- **[Build System Guide](docs/BUILD_SYSTEM.md)** - Build system architecture and usage
+- **[User Management Guide](docs/USER_MANAGEMENT.md)** - User management system guide
+
+### API & Development
+- **[API Reference](docs/API_REFERENCE.md)** - Comprehensive API reference
+- **[Plugin Development](#plugin-development)** - Plugin development guide
+
+### Implementation & Deployment
+- **[New File System Agents](docs/NEW_FILE_SYSTEM_AGENTS.md)** - New file system agents implementation
+- **[Docker & GitHub Action Setup](docs/DOCKER_GITHUB_ACTION_SETUP.md)** - Docker and CI/CD setup
+
+### Architecture & Design
+- **[Middleware Agent Design](docs/MIDDLEWARE_AGENT_DESIGN.md)** - Middleware agent design discussion
+- **[Implementation Plan](docs/IMPLEMENTATION_PLAN.md)** - Middleware implementation plan
+
+### Project Status
+- **[AFE Build Complete](docs/AFE_BUILD_COMPLETE.md)** - Build system completion status
+- **[Web Agent Complete](docs/WEB_AGENT_COMPLETE.md)** - Web agent completion status
+- **[Status Investigation](docs/SESSION_STATUS_INVESTIGATION.md)** - Status system investigation notes
+
+### Community
+- **[Contributing Guide](docs/CONTRIBUTING.md)** - How to contribute to AgentForgeEngine
+
+
 
 ## 🚀 Quick Start
 
@@ -79,6 +105,15 @@ $ ./afe init --verbose
 ✅ User directories ready
 ```
 
+### 📚 Need Help?
+
+For detailed documentation and guides, see the [Documentation Index](docs/README.md) which includes:
+- Complete setup instructions
+- Agent development guides
+- Testing framework documentation
+- Build system details
+- And much more!
+
 ## 🏗️ Architecture
 
 ### Directory Structure
@@ -115,6 +150,12 @@ AgentForgeEngine/
 │   ├── find/              # File search agent
 │   ├── stat/              # File status agent
 │   ├── chat/              # Chat interface agent
+│   ├── echo/              # Message output agent
+│   ├── touch/             # File creation agent
+│   ├── mkdir/             # Directory creation agent
+│   ├── rm/                # File/directory removal agent
+│   ├── cp/                # File/directory copy agent
+│   ├── mv/                # File/directory move agent
 │   ├── web-agent/         # Web interaction agent
 │   ├── file-agent/        # File management agent
 │   └── task-agent/        # Task execution agent
@@ -502,7 +543,7 @@ type Agent interface {
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.md) for details.
 
 ### Development Setup
 

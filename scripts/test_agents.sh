@@ -243,7 +243,7 @@ EOF
 test_all_agents() {
     print_header "Testing all agents"
     
-    local agents=("ls" "cat" "todo" "pwd" "whoami" "uname" "ps" "df" "du" "grep" "find" "stat" "chat")
+    local agents=("ls" "cat" "todo" "pwd" "whoami" "uname" "ps" "df" "du" "grep" "find" "stat" "chat" "echo" "touch" "mkdir" "rm" "cp" "mv")
     local passed=0
     local failed=0
     

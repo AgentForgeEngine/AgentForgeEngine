@@ -1,10 +1,10 @@
-# Qwen3 Provider for AgentForge Engine 🤖
+# Qwen3 Provider for AgentForgeEngine 🤖
 
 [![Qwen3](https://img.shields.io/badge/Qwen3-3.0-blue.svg)](https://qwen3.ai/)
 [![Provider](https://img.shields.io/badge/Provider-Plugin-green.svg)](https://github.com/AgentForgeEngine/AgentForgeEngine)
 [![HTTP Streaming](https://img.shields.io/badge/HTTP-Streaming-orange.svg)](https://github.com/AgentForgeEngine/AgentForgeEngine)
 
-A high-performance provider plugin for AgentForge Engine that enables seamless integration with Qwen3 models via llama.cpp HTTP streaming with Jinja2 template processing.
+A high-performance provider plugin for AgentForgeEngine that enables seamless integration with Qwen3 models via llama.cpp HTTP streaming with Jinja2 template processing.
 
 ## 🌟 Features
 
@@ -32,7 +32,7 @@ A high-performance provider plugin for AgentForge Engine that enables seamless i
 ### Prerequisites
 
 - Qwen3 3.0 model running on llama.cpp
-- AgentForge Engine with build system
+- AgentForgeEngine with build system
 - Default endpoint: `localhost:8080`
 
 ### Installation
@@ -505,7 +505,7 @@ Custom system prompt with {{ custom_setting }}
 # Start llama.cpp with Qwen3
 ./llama.cpp --model qwen3-7b-chat --host 0.0.0.0 --port 8080
 
-# Configure AgentForge Engine
+# Configure AgentForgeEngine
 cat > agentforge.yaml << EOF
 providers:
   - name: "qwen3"
@@ -572,4 +572,4 @@ EOF
 
 ---
 
-**Built with ❤️ by the AgentForge Engine team**
+**Built with ❤️ by the AgentForgeEngine team**

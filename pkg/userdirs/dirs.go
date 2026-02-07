@@ -84,7 +84,7 @@ func (ud *UserDirectories) Exists() bool {
 
 // GetDefaultConfig returns the default user configuration
 func (ud *UserDirectories) GetDefaultConfig() string {
-	return fmt.Sprintf(`# AgentForge Engine User Configuration
+	return fmt.Sprintf(`# AgentForgeEngine User Configuration
 # This configuration applies to ALL your projects
 
 build:

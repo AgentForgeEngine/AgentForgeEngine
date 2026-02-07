@@ -15,8 +15,8 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:   "agentforge-engine",
-	Short: "AgentForge Engine - Modular agent framework",
-	Long: `AgentForge Engine is a modular agent framework that sits between 
+	Short: "AgentForgeEngine - Modular agent framework",
+	Long: `AgentForgeEngine is a modular agent framework that sits between 
 offline models (llama.cpp, ollama) and agents written in Go. 
 It provides dynamic loading of agents from GitHub repositories, 
 hot reload capabilities, and a unified interface for model interactions.`,

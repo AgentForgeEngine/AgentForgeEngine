@@ -1,10 +1,10 @@
-# AgentForge Engine User Management 🛡️
+# AgentForgeEngine User Management 🛡️
 
 [![Security](https://img.shields.io/badge/Security-Enterprise-green.svg)](https://github.com/AgentForgeEngine/AgentForgeEngine)
 [![LevelDB](https://img.shields.io/badge/LevelDB-Embedded-blue.svg)](https://github.com/syndtr/goleveldb)
 [![bcrypt](https://img.shields.io/badge/bcrypt-Secure-orange.svg)](https://golang.org/x/crypto/bcrypt)
 
-Enterprise-grade user management system for AgentForge Engine with LevelDB storage, bcrypt password hashing, and secure API key management.
+Enterprise-grade user management system for AgentForgeEngine with LevelDB storage, bcrypt password hashing, and secure API key management.
 
 ## 🌟 Security Features
 
@@ -21,10 +21,10 @@ Enterprise-grade user management system for AgentForge Engine with LevelDB stora
 - [User Management](#user-management)
 - [API Key Management](#api-key-management)
 - [Security Architecture](#security-architecture)
-- [CLI Reference](#cli-reference)
 - [Configuration](#configuration)
 - [Troubleshooting](#troubleshooting)
-- [API Reference](#api-reference)
+- [User Management API](#user-management-api)
+- [Security Best Practices](#security-best-practices)
 
 ## 🚀 Quick Start
 
@@ -427,4 +427,4 @@ if err != nil {
 
 ---
 
-**Built with ❤️ by the AgentForge Engine security team**
+**Built with ❤️ by the AgentForgeEngine security team**
