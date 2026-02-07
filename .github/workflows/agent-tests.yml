@@ -52,7 +52,7 @@ jobs:
           go run scripts/test_docker.go ./agents
 
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-results
@@ -124,7 +124,7 @@ jobs:
         go build -buildmode=plugin -o ${{ matrix.agent }}.so .
 
     - name: Upload agent plugin
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.agent }}-plugin
         path: agents/${{ matrix.agent }}/${{ matrix.agent }}.so
@@ -203,7 +203,7 @@ jobs:
         output: 'trivy-results.sarif'
 
     - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: 'trivy-results.sarif'
