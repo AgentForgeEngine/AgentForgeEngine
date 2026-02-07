@@ -23,7 +23,7 @@ A comprehensive, intelligent build system for AgentForgeEngine plugins with YAML
 - [Hot Reload](#hot-reload)
 - [Build Analytics](#build-analytics)
 - [Troubleshooting](#troubleshooting)
-- [API Reference](#api-reference)
+- [Build Cache API](#build-cache-api)
 
 ## 🚀 Quick Start
 

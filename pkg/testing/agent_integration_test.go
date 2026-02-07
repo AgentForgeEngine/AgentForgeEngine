@@ -159,7 +159,7 @@ func TestModelResponseParsing(t *testing.T) {
 
 // TestFunctionResponseRoundTrip tests the complete round-trip of function responses
 func TestFunctionResponseRoundTrip(t *testing.T) {
-	agents := []string{"ls", "cat", "todo", "pwd", "whoami", "uname", "ps", "df", "du", "grep", "find", "stat", "chat"}
+	agents := []string{"ls", "cat", "todo", "pwd", "whoami", "uname", "ps", "df", "du", "grep", "find", "stat", "chat", "echo", "touch", "mkdir", "rm", "cp", "mv"}
 
 	for _, agentName := range agents {
 		t.Run(fmt.Sprintf("RoundTrip_%s", agentName), func(t *testing.T) {
@@ -233,6 +233,33 @@ func createMockArgumentsForAgent(agentName string) map[string]interface{} {
 	case "todo":
 		return map[string]interface{}{
 			"steps": []string{"Step 1", "Step 2", "Step 3"},
+		}
+	case "echo":
+		return map[string]interface{}{
+			"message": "Hello from echo agent",
+			"file":    "",
+		}
+	case "touch":
+		return map[string]interface{}{
+			"file": "/tmp/touch_test.txt",
+		}
+	case "mkdir":
+		return map[string]interface{}{
+			"path": "/tmp/mkdir_test",
+		}
+	case "rm":
+		return map[string]interface{}{
+			"path": "/tmp/rm_test.txt",
+		}
+	case "cp":
+		return map[string]interface{}{
+			"source":      "/tmp/cp_source.txt",
+			"destination": "/tmp/cp_dest.txt",
+		}
+	case "mv":
+		return map[string]interface{}{
+			"source":      "/tmp/mv_source.txt",
+			"destination": "/tmp/mv_dest.txt",
 		}
 	case "pwd":
 		return map[string]interface{}{}

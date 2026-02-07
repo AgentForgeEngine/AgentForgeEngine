@@ -10,13 +10,13 @@ import (
 
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "Show AgentForge Engine status",
-	Long:  "Display the current status of AgentForge Engine and its components",
+	Short: "Show AgentForgeEngine status",
+	Long:  "Display the current status of AgentForgeEngine and its components",
 	RunE:  runStatus,
 }
 
 func runStatus(cmd *cobra.Command, args []string) error {
-	fmt.Println("AgentForge Engine Status:")
+	fmt.Println("AgentForgeEngine Status:")
 	fmt.Println("=========================")
 
 	// Initialize user directories and status manager
@@ -43,7 +43,7 @@ func runStatus(cmd *cobra.Command, args []string) error {
 
 func printDetailedStatus(statusInfo *status.StatusInfo) {
 	fmt.Printf("Status: %s ✓\n", statusInfo.Status)
-	fmt.Printf("Process: AgentForge Engine is active (PID: %d)\n", statusInfo.PID)
+	fmt.Printf("Process: AgentForgeEngine is active (PID: %d)\n", statusInfo.PID)
 
 	if verbose {
 		fmt.Println("\nDetailed Information:")
@@ -64,7 +64,7 @@ func printDetailedStatus(statusInfo *status.StatusInfo) {
 func printBasicStatus(statusInfo *status.StatusInfo) {
 	if statusInfo.Status == "RUNNING" {
 		fmt.Printf("Status: %s ✓\n", statusInfo.Status)
-		fmt.Printf("Process: AgentForge Engine is active (PID: %d)\n", statusInfo.PID)
+		fmt.Printf("Process: AgentForgeEngine is active (PID: %d)\n", statusInfo.PID)
 
 		if verbose {
 			fmt.Println("\nBasic Information:")
@@ -78,7 +78,7 @@ func printBasicStatus(statusInfo *status.StatusInfo) {
 		}
 	} else {
 		fmt.Printf("Status: %s ✗\n", statusInfo.Status)
-		fmt.Println("Process: No AgentForge Engine instance found")
+		fmt.Println("Process: No AgentForgeEngine instance found")
 	}
 }
 

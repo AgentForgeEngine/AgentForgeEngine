@@ -185,7 +185,7 @@ I think the most compelling starting points would be:
 ## 📝 **Implementation Notes**
 
 ### Current Architecture Context
-- AgentForge Engine uses `interfaces.Agent` interface
+- AgentForgeEngine uses `interfaces.Agent` interface
 - Agents process `AgentInput` and return `AgentOutput`
 - Plugin system supports dynamic loading
 - Function response format: `<function_response name="agent">{JSON}</function_response>`
@@ -227,5 +227,5 @@ middleware/
 ---
 
 **Stored on**: 2025-02-05  
-**Context**: Design discussion for AgentForge Engine middleware agents  
+**Context**: Design discussion for AgentForgeEngine middleware agents  
 **Status**: Conceptual design complete, implementation deferred

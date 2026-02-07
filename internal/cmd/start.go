@@ -17,8 +17,8 @@ import (
 
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Start AgentForge Engine",
-	Long:  "Start the AgentForge Engine with the specified configuration",
+	Short: "Start AgentForgeEngine",
+	Long:  "Start the AgentForgeEngine with the specified configuration",
 	RunE:  runStart,
 }
 
@@ -50,7 +50,7 @@ func runStart(cmd *cobra.Command, args []string) error {
 	}
 
 	if verbose {
-		fmt.Println("Starting AgentForge Engine...")
+		fmt.Println("Starting AgentForgeEngine...")
 		fmt.Printf("Config loaded from: %s\n", configPath)
 		fmt.Printf("PID file: %s\n", statusManager.GetPIDFile())
 		fmt.Printf("Socket file: %s\n", statusManager.GetSocketFile())
@@ -114,7 +114,7 @@ func runStart(cmd *cobra.Command, args []string) error {
 		log.Printf("Cleanup error: %v", err)
 	}
 
-	fmt.Println("AgentForge Engine stopped")
+	fmt.Println("AgentForgeEngine stopped")
 	return nil
 }
 

@@ -45,3 +45,6 @@ PROVIDER_IMPLEMENTATION_REPORT.md
 
 # Test files (temporary)
 test_provider_direct.go
+
+# Job summaries
+JOB_SUMMARY/

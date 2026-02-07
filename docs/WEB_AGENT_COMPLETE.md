@@ -59,7 +59,7 @@ Your `configs/agentforge.yaml` now includes:
 The agent is built and ready to test:
 
 ```bash
-# Start AgentForge Engine (when server is implemented)
+# Start AgentForgeEngine (when server is implemented)
 agentforge start
 
 # Test with the provided script

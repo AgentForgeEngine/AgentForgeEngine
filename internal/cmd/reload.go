@@ -21,7 +21,7 @@ var (
 
 func runReload(cmd *cobra.Command, args []string) error {
 	if verbose {
-		fmt.Println("Reloading AgentForge Engine...")
+		fmt.Println("Reloading AgentForgeEngine...")
 	}
 
 	if reloadAll || reloadAgent == "" {

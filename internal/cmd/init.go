@@ -157,7 +157,7 @@ func createInitialCache(userDirs *userdirs.UserDirectories) error {
 
 	systemInfo := userDirs.GetSystemInfo()
 
-	initialCache := fmt.Sprintf(`# AgentForge Engine Build Cache
+	initialCache := fmt.Sprintf(`# AgentForgeEngine Build Cache
 # Schema Version: 1.0
 version: "1.0"
 created_at: "%s"
