@@ -20,7 +20,7 @@ RUN go mod download
 COPY . .
 
 # Build the main binary
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o afe ./cmd/agentforge
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o afe ./cmd/agentforgeengine
 
 # Test stage
 FROM golang:1.24-alpine AS tester
