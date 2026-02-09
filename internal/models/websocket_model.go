@@ -8,11 +8,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/AgentForgeEngine/AgentForgeEngine/pkg/interfaces"
-	"github.com/gorilla/websocket"
 )
 
 type WebSocketModel struct {
@@ -72,13 +70,14 @@ func (m *WebSocketModel) Generate(ctx context.Context, req interfaces.Generation
 
 func (m *WebSocketModel) generateOllama(ctx context.Context, req interfaces.GenerationRequest) (*interfaces.GenerationResponse, error) {
 	// Create request payload for ollama-websocket-gateway
-	payload := map[string]interface{}{
-		"model":  m.config.Name, // Use model name from config
-		"prompt": req.Prompt,
-	}
-
-	// Use WebSocket directly for ollama-websocket-gateway
-	return m.generateViaWebSocket(ctx, payload)
+	// Fallback to HTTP-based generation for now
+	return m.generateGeneric(ctx, interfaces.GenerationRequest{
+		Prompt:      req.Prompt,
+		MaxTokens:   req.MaxTokens,
+		Temperature: req.Temperature,
+		StopTokens:  req.StopTokens,
+		Stream:      req.Stream,
+	})
 }
 
 func (m *WebSocketModel) generateGeneric(ctx context.Context, req interfaces.GenerationRequest) (*interfaces.GenerationResponse, error) {

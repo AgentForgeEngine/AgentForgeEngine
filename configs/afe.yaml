@@ -1,0 +1,75 @@
+server:
+  host: "localhost"
+  port: 8082
+
+models:
+  - name: "llamacpp"
+    type: "http"
+    endpoint: "http://localhost:8080/completion"
+    options:
+      timeout: 30
+      max_retries: 3
+  # - name: "qwen3-coder"
+  #   type: "websocket"
+  #   endpoint: "ws://localhost:11435"
+  #   options:
+  #     timeout: 60
+  #     max_retries: 0
+
+agents:
+  local:
+    - name: "ls"
+      path: "./agents/ls"
+      config:
+        timeout: 10
+    - name: "cat"
+      path: "./agents/cat"
+      config:
+        timeout: 10
+    - name: "pwd"
+      path: "./agents/pwd"
+      config:
+        timeout: 5
+    - name: "whoami"
+      path: "./agents/whoami"
+      config:
+        timeout: 5
+    - name: "df"
+      path: "./agents/df"
+      config:
+        timeout: 10
+    - name: "uname"
+      path: "./agents/uname"
+      config:
+        timeout: 10
+    - name: "web-agent"
+      path: "./agents/web-agent"
+      config:
+        default_max_tokens: 8000
+        max_allowed_tokens: 15000
+        min_allowed_tokens: 500
+        timeout: 15
+        user_agent: "AgentForgeEngine-WebAgent/1.0"
+        allowed_domains: ["*"]
+        blocked_domains: ["ads.*", "trackers.*"]
+        content_types: ["text/html", "application/json", "text/plain", "application/xml", "text/xml"]
+        include_links: true
+        include_metadata: true
+  remote:
+    - name: "code-assistant"
+      repo: "github.com/user/agent-code-assistant"
+      version: "latest"
+      entrypoint: "main.go"
+
+orchestrator:
+  enabled: true
+  max_concurrent_tasks: 10
+  task_timeout: "5m"
+  retry_attempts: 3
+  task_queue_size: 1000
+
+recovery:
+  hot_reload: true
+  max_retries: 3
+  backoff_sec: 5
+  health_check: 30

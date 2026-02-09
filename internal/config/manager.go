@@ -15,10 +15,19 @@ type Manager struct {
 }
 
 type Config struct {
-	Server   interfaces.ServerConfig   `yaml:"server"`
-	Models   []interfaces.ModelConfig  `yaml:"models"`
-	Agents   AgentsConfig              `yaml:"agents"`
-	Recovery interfaces.RecoveryConfig `yaml:"recovery"`
+	Server       interfaces.ServerConfig   `yaml:"server"`
+	Models       []interfaces.ModelConfig  `yaml:"models"`
+	Agents       AgentsConfig              `yaml:"agents"`
+	Recovery     interfaces.RecoveryConfig `yaml:"recovery"`
+	Orchestrator OrchestratorConfig        `yaml:"orchestrator"`
+}
+
+type OrchestratorConfig struct {
+	Enabled            bool   `yaml:"enabled"`
+	MaxConcurrentTasks int    `yaml:"max_concurrent_tasks"`
+	TaskTimeout        string `yaml:"task_timeout"`
+	RetryAttempts      int    `yaml:"retry_attempts"`
+	TaskQueueSize      int    `yaml:"task_queue_size"`
 }
 
 type AgentsConfig struct {
@@ -113,15 +122,11 @@ func (m *Manager) GetServerConfig() interfaces.ServerConfig {
 }
 
 func (m *Manager) GetRecoveryConfig() interfaces.RecoveryConfig {
-	if m.config == nil {
-		return interfaces.RecoveryConfig{
-			HotReload:   true,
-			MaxRetries:  3,
-			BackoffSec:  5,
-			HealthCheck: 30,
-		}
-	}
 	return m.config.Recovery
+}
+
+func (m *Manager) GetOrchestratorConfig() OrchestratorConfig {
+	return m.config.Orchestrator
 }
 
 func (m *Manager) Watch(callback func()) error {

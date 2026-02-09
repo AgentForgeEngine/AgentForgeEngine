@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,6 +11,7 @@ import (
 	"github.com/AgentForgeEngine/AgentForgeEngine/pkg/auth"
 	"github.com/AgentForgeEngine/AgentForgeEngine/pkg/userdirs"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 // userCmd represents the user command group
@@ -86,7 +88,6 @@ func init() {
 	// User create flags
 	userCreateCmd.Flags().StringVar(&userName, "name", "", "User name (required)")
 	userCreateCmd.Flags().StringVar(&userEmail, "email", "", "User email (required)")
-	userCreateCmd.Flags().StringVar(&userPassword, "password", "", "User password (required)")
 	userCreateCmd.Flags().StringVar(&userPhone, "phone", "", "User phone number (optional)")
 
 	// User login flags
@@ -100,11 +101,61 @@ func init() {
 	apiKeyCreateCmd.Flags().StringVar(&userEmail, "email", "", "User email (required)")
 }
 
+// readPassword reads password from terminal without echoing, or from stdin if piped
+func readPassword(prompt string) (string, error) {
+	fmt.Print(prompt)
+
+	// Check if stdin is a terminal (interactive)
+	if term.IsTerminal(int(os.Stdin.Fd())) {
+		// Interactive mode - read password without echoing
+		password, err := term.ReadPassword(int(os.Stdin.Fd()))
+		if err != nil {
+			return "", fmt.Errorf("failed to read password: %w", err)
+		}
+		fmt.Println() // Add newline after password input
+		return string(password), nil
+	} else {
+		// Non-interactive mode - read from stdin
+		reader := bufio.NewReader(os.Stdin)
+		passwordStr, err := reader.ReadString('\n')
+		if err != nil {
+			return "", fmt.Errorf("failed to read password: %w", err)
+		}
+		return strings.TrimSpace(passwordStr), nil
+	}
+}
+
 // runUserCreate creates a new user account
 func runUserCreate(cmd *cobra.Command, args []string) error {
-	if userName == "" || userEmail == "" || userPassword == "" {
-		return fmt.Errorf("name, email, and password are required")
+	if userName == "" || userEmail == "" {
+		return fmt.Errorf("name and email are required")
 	}
+
+	// Read password interactively
+	password, err := readPassword("Enter password: ")
+	if err != nil {
+		return err
+	}
+
+	if len(password) == 0 {
+		return fmt.Errorf("password cannot be empty")
+	}
+
+	// Confirm password
+	confirmPassword, err := readPassword("Confirm password: ")
+	if err != nil {
+		return err
+	}
+
+	if len(confirmPassword) == 0 {
+		return fmt.Errorf("password confirmation cannot be empty")
+	}
+
+	if password != confirmPassword {
+		return fmt.Errorf("passwords do not match")
+	}
+
+	userPassword = password
 
 	// Initialize user directories
 	userDirs, err := userdirs.NewUserDirectories()

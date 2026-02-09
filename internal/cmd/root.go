@@ -14,9 +14,9 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "agentforge-engine",
-	Short: "AgentForgeEngine - Modular agent framework",
-	Long: `AgentForgeEngine is a modular agent framework that sits between 
+	Use:   "afe",
+	Short: "AgentForgeEngine (afe) - Modular agent framework",
+	Long: `AgentForgeEngine (afe) is a modular agent framework that sits between 
 offline models (llama.cpp, ollama) and agents written in Go. 
 It provides dynamic loading of agents from GitHub repositories, 
 hot reload capabilities, and a unified interface for model interactions.`,
@@ -29,7 +29,7 @@ func Execute() error {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.agentforge.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.afe/afe.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 
 	// Bind flags to viper
@@ -47,7 +47,7 @@ func initConfig() {
 		viper.AddConfigPath(".")
 		viper.AddConfigPath("./configs")
 		viper.SetConfigType("yaml")
-		viper.SetConfigName("agentforge")
+		viper.SetConfigName("afe")
 	}
 
 	viper.AutomaticEnv()

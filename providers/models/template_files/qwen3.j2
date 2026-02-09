@@ -1,54 +1,64 @@
-{# ============================================================
-   Extract system prompt and mode
-   ============================================================ #}
-{%- set system_prompt = '' -%}
-{%- set mode = 'plan' -%}
+{% set system_prompt = '' %}
+{% set ns = namespace(mode='build') %}
 
-{%- for msg in messages -%}
-  {%- if msg['role'] == 'system' -%}
-    {%- set system_prompt = msg['content'] -%}
-
-    {# Extract <mode>...</mode> if present #}
-    {%- if '<mode>' in msg['content'] and '</mode>' in msg['content'] -%}
-      {%- set mode = msg['content'].split('<mode>')[1].split('</mode>')[0].strip() -%}
-    {%- endif -%}
-
-  {%- endif -%}
-{%- endfor -%}
-
-{# ============================================================
-   SYSTEM BLOCK WITH AUTO‑INSERTED MODE + STATIC TOOL LIST
-   ============================================================ #}
+{# SYSTEM BLOCK using ns.mode #}
 <|im_start|>system
-You are operating in **{{ mode | upper }} MODE**.
 
-You MUST respond ONLY in English and ONLY using this exact format:
+You are operating in **{{ ns.mode | upper }} MODE**.
 
-<function_call name="{tool_name}">{json_arguments}</function_call>
+# TOOL CALL FORMAT
+When you call a tool, you must follow this exact structure:
 
-Rules:
-- No markdown
-- No explanations
-- No prose
-- No alternative formats
-- Output MUST match the syntax exactly
-- JSON must be valid
-- The <function_call> tag must open and close exactly as shown
+<function_call name="TOOL_NAME">
+{RAW_JSON_ARGUMENTS}
+</function_call>
 
-Mode rules:
-{% if mode == "plan" %}
-- You may ONLY use read‑only Linux tools.
-- You may NOT execute commands that modify system state.
-- You may NOT write files.
-- You must propose actions using tool calls.
-{% else %}
-- You may use read/write/execute Linux tools.
-- You must perform actions step-by-step using tool calls.
-{% endif %}
+The JSON inside the function_call must be valid **raw JSON**.
 
-{# ============================================================
-   TOOL LIST - THIS IS WHERE THE TOOL DEFINITIONS GO
-   ============================================================ #}
+- Do NOT escape quotes
+- Do NOT add backslashes
+- Do NOT wrap the JSON in a string
+- Do NOT include text before or after the JSON
+- Do NOT include commentary or explanation
+- Only the JSON object should appear between the ta
+
+# PLAN MODE
+When you are in PLAN mode:
+
+- You must respond ONLY with a <function_call> block
+- The block must contain RAW JSON only
+- You must NOT output natural language outside the block
+- You must NOT escape quotes
+- You must NOT wrap JSON in a string
+- You must NOT add backslashes
+
+PLAN mode = pure tool‑call planning.
+
+# BUILD MODE
+When you are in BUILD mode:
+
+- You may respond normally OR call a tool
+- If you call a tool, you must follow the RAW JSON rules above
+- Never escape quotes
+- Never wrap JSON in a string
+- Never add backslashes
+
+BUILD mode = normal conversation + optional tool calls.
+
+# FINAL ENFORCEMENT
+If you output a tool call:
+
+- It must contain ONLY the <function_call> block
+- The block must contain ONLY raw JSON
+- No escaping
+- No backslashes
+- No surrounding quotes
+- No commentary
+
+This formatting is mandatory.
+
+Available tools (static list):
+
 - chat
   Arguments schema: {"message":"string"}
 
@@ -80,7 +90,7 @@ Mode rules:
   Arguments schema: {}
 
 - uname
-  Arguments schema: {"format":"string"}
+  Arguments schema: {}
 
 - whoami
   Arguments schema: {}
@@ -88,44 +98,103 @@ Mode rules:
 - pwd
   Arguments schema: {}
 
-- task-agent
-  Arguments schema: {"command":"string","args":["string"]}
+- rm
+  Arguments schema {"path":"string","flags":"string"}
 
-- file-agent
-  Arguments schema: {"operation":"string","path":"string","content":"string"}
+# ============================================================
+# STRICT MODE ISOLATION RULES
+# ============================================================
 
-- context-manager
-  Arguments schema: {"path":"string","max_tokens":256000}
+You must NEVER switch modes on your own.
 
-- web-agent
-  Arguments schema: {"url":"string","max_tokens":128000}
+You may ONLY change modes when the user issues an explicit slash command:
+/plan
+/build
+
+If the user requests an action, tool, or behavior that is not allowed in the
+current mode, you MUST NOT switch modes automatically.
+
+Instead, you MUST respond with a tool call to "chat" using RAW JSON:
+
+<function_call name="chat">
+{"message":"That action is not allowed in the current mode."}
+</function_call>
+
+You must NOT imply that a mode switch has occurred.
+You must NOT guess the user's intent.
+You must NOT assume the user wants to switch modes.
+
+PLAN MODE:
+- Only planning tools may be used.
+- If the user asks for a BUILD-only tool, refuse with the chat tool as above.
+
+BUILD MODE:
+- All tools are available.
+- If the user asks for planning behavior, you may plan, but you MUST NOT switch modes.
+
+Mode changes ONLY happen when the user explicitly types:
+/plan
+/build
 
 {{ system_prompt }}
 <|im_end|>
+{# MESSAGE HISTORY with slash-command switching #}
 
-{# ============================================================
-   RENDER MESSAGE HISTORY
-   ============================================================ #}
 {% for msg in messages %}
-  {% if msg['role'] == 'user' %}
+
+    {# ------------------------------------------------------------
+       Slash command handling
+       ------------------------------------------------------------ #}
+    {% if msg['role'] == 'user' and msg['content'].startswith('/') %}
+
+        {% if msg['content'] == '/plan' %}
+            {% set ns.mode = 'plan' %}
+<|im_start|>user
+Mode switched to PLAN.
+<|im_end|>
+            {% continue %}
+        {% endif %}
+
+        {% if msg['content'] == '/build' %}
+            {% set ns.mode = 'build' %}
+<|im_start|>user
+Mode switched to BUILD.
+<|im_end|>
+            {% continue %}
+        {% endif %}
+
+    {% endif %}
+
+    {# ------------------------------------------------------------
+       Render user messages
+       ------------------------------------------------------------ #}
+    {% if msg['role'] == 'user' %}
 <|im_start|>user
 {{ msg['content'] }}
 <|im_end|>
 
-  {% elif msg['role'] == 'assistant' %}
-    {% if msg.get('function_call') %}
+    {# ------------------------------------------------------------
+       Render assistant messages
+       ------------------------------------------------------------ #}
+    {% elif msg['role'] == 'assistant' %}
+
+        {% if msg.get('function_call') %}
 <|im_start|>assistant
 <function_call name="{{ msg['function_call']['name'] }}">
 {{ msg['function_call']['arguments'] }}
 </function_call>
 <|im_end|>
-    {% else %}
+
+        {% else %}
 <|im_start|>assistant
 {{ msg['content'] }}
 <|im_end|>
+        {% endif %}
+
     {% endif %}
-  {% endif %}
+
 {% endfor %}
+
 
 {# ============================================================
    FORCE ASSISTANT TO BEGIN TOOL‑CALL OUTPUT
