@@ -22,7 +22,7 @@ echo
 
 # Test 3: Check AFE configuration
 echo "3. Current AFE model configuration:"
-grep -A 5 "qwen3-coder" configs/agentforge.yaml || echo "❌ qwen3-coder not found in config"
+grep -A 5 "qwen3-coder" configs/afe.yaml || echo "❌ qwen3-coder not found in config"
 
 echo
 

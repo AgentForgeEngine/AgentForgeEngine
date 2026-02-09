@@ -9,7 +9,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/AgentForgeEngine/AgentForgeEngine/internal/api"
 	"github.com/AgentForgeEngine/AgentForgeEngine/internal/config"
+	"github.com/AgentForgeEngine/AgentForgeEngine/internal/loader"
+	"github.com/AgentForgeEngine/AgentForgeEngine/internal/models"
+
 	"github.com/AgentForgeEngine/AgentForgeEngine/pkg/status"
 	"github.com/AgentForgeEngine/AgentForgeEngine/pkg/userdirs"
 	"github.com/spf13/cobra"
@@ -25,6 +29,9 @@ var startCmd = &cobra.Command{
 var serverCtx context.Context
 var serverCancel context.CancelFunc
 var statusManager *status.Manager
+var pluginManager *loader.Manager
+
+// var orchestratorManager *orchestrator.Manager // Disabled for now
 
 func runStart(cmd *cobra.Command, args []string) error {
 	// Initialize user directories and status manager
@@ -119,9 +126,6 @@ func runStart(cmd *cobra.Command, args []string) error {
 }
 
 func startServerComponents(ctx context.Context, configManager *config.Manager, statusInfo *status.StatusInfo) error {
-	// This will be implemented when we add the actual server components
-	// For now, just demonstrate the structure
-
 	serverConfig := configManager.GetServerConfig()
 	if verbose {
 		fmt.Printf("Server starting on %s:%d\n", serverConfig.Host, serverConfig.Port)
@@ -131,10 +135,54 @@ func startServerComponents(ctx context.Context, configManager *config.Manager, s
 	statusInfo.Host = serverConfig.Host
 	statusInfo.Port = serverConfig.Port
 
-	// TODO: Initialize model manager
-	// TODO: Initialize plugin manager
-	// TODO: Initialize recovery system
-	// TODO: Start HTTP server
+	// Initialize plugin manager
+	userDirs, err := userdirs.NewUserDirectories()
+	if err != nil {
+		return fmt.Errorf("failed to create user directories: %w", err)
+	}
+
+	pluginManager = loader.NewManager(userDirs.AgentsDir, userDirs.CacheDir)
+
+	if verbose {
+		fmt.Printf("Plugin manager initialized with plugins dir: %s\n", userDirs.AgentsDir)
+	}
+
+	// Load available agents
+	agentConfigs := configManager.GetAgentConfigs()
+	for _, agentConfig := range agentConfigs {
+		if agentConfig.Type == "local" {
+			err := pluginManager.LoadLocalAgent(agentConfig.Path, agentConfig.Name)
+			if err != nil && verbose {
+				log.Printf("Failed to load agent %s: %v", agentConfig.Name, err)
+			} else if verbose {
+				fmt.Printf("Loaded agent: %s\n", agentConfig.Name)
+			}
+		}
+
+		// This would be called by model via function_call
+
+	}
+
+	// Initialize model manager
+	modelManager := models.NewManager()
+	modelConfigs := configManager.GetModelConfigs()
+	if err := modelManager.InitializeModels(modelConfigs); err != nil {
+		log.Printf("Failed to initialize models: %v", err)
+	} else if verbose {
+		fmt.Printf("Initialized %d models\n", len(modelConfigs))
+	}
+
+	// Initialize HTTP API server
+	apiServer := api.NewServer(serverConfig.Host, serverConfig.Port)
+	apiServer.SetComponents(statusManager, pluginManager, modelManager)
+
+	// Start API server in goroutine
+	go func() {
+		if err := apiServer.Start(serverCtx); err != nil {
+			log.Printf("API server error: %v", err)
+			serverCancel()
+		}
+	}()
 
 	// Keep the server running
 	<-ctx.Done()
@@ -148,9 +196,9 @@ func getConfigPath() string {
 
 	// Try default locations
 	defaultPaths := []string{
-		"./configs/agentforge.yaml",
-		"./agentforge.yaml",
-		"$HOME/.agentforge.yaml",
+		"./configs/afe.yaml",
+		"./afe.yaml",
+		"$HOME/.afe/configs/afe.yaml",
 	}
 
 	for _, path := range defaultPaths {
@@ -159,7 +207,7 @@ func getConfigPath() string {
 		}
 	}
 
-	return "./configs/agentforge.yaml" // fallback
+	return "./configs/afe.yaml" // fallback
 }
 
 func init() {

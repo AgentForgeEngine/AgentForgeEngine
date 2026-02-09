@@ -22,7 +22,7 @@ func NewHTTPModel(config interfaces.ModelConfig) *HTTPModel {
 	return &HTTPModel{
 		config: config,
 		client: &http.Client{
-			Timeout: time.Duration(getTimeout(config.Options)),
+			Timeout: time.Duration(getTimeout(config.Options)) * time.Second,
 		},
 	}
 }
@@ -112,7 +112,7 @@ func (m *HTTPModel) Generate(ctx context.Context, req interfaces.GenerationReque
 
 func (m *HTTPModel) HealthCheck() error {
 	// Simple health check by making a test request
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(getTimeout(m.config.Options))*time.Second)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, "GET", m.config.Endpoint+"/health", nil)
@@ -131,7 +131,9 @@ func (m *HTTPModel) HealthCheck() error {
 		return nil
 	}
 
-	return fmt.Errorf("health check failed with status: %d", resp.StatusCode)
+	// Read body for debugging
+	body, _ := io.ReadAll(resp.Body)
+	return fmt.Errorf("health check failed with status: %d, body: %s", resp.StatusCode, string(body))
 }
 
 func (m *HTTPModel) Shutdown() error {
@@ -142,6 +144,7 @@ func (m *HTTPModel) Shutdown() error {
 func (m *HTTPModel) isLlamaCpp() bool {
 	return m.config.Name == "llamacpp" ||
 		containsIgnoreCase(m.config.Endpoint, "llamacpp") ||
+		containsIgnoreCase(m.config.Endpoint, "8080") ||
 		containsIgnoreCase(m.config.Endpoint, "8081")
 }
 
