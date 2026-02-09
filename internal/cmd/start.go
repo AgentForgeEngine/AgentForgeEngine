@@ -194,11 +194,11 @@ func getConfigPath() string {
 		return cfgFile
 	}
 
-	// Try default locations
+	// Try default locations - prioritize user config
 	defaultPaths := []string{
+		"$HOME/.afe/configs/afe.yaml",
 		"./configs/afe.yaml",
 		"./afe.yaml",
-		"$HOME/.afe/configs/afe.yaml",
 	}
 
 	for _, path := range defaultPaths {
@@ -207,7 +207,7 @@ func getConfigPath() string {
 		}
 	}
 
-	return "./configs/afe.yaml" // fallback
+	return "$HOME/.afe/configs/afe.yaml" // fallback
 }
 
 func init() {
