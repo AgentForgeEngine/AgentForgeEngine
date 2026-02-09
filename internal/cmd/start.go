@@ -202,12 +202,13 @@ func getConfigPath() string {
 	}
 
 	for _, path := range defaultPaths {
-		if _, err := os.Stat(path); err == nil {
-			return path
+		expandedPath := os.ExpandEnv(path)
+		if _, err := os.Stat(expandedPath); err == nil {
+			return expandedPath
 		}
 	}
 
-	return "$HOME/.afe/configs/afe.yaml" // fallback
+	return os.ExpandEnv("$HOME/.afe/configs/afe.yaml") // fallback
 }
 
 func init() {
